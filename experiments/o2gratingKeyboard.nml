@@ -1,0 +1,194 @@
+<?xml version="1.0" ?>
+<Experiment xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="file://c:/program files/neurostim/settings/experiment.xsd">
+
+  <Controller>
+    <PlugIns>
+      <mcc>
+        <use>       0  </use>
+        <LISTENTO>
+          <EVENT>
+            <NAME>  LIQUIDREWARD  </NAME>
+            <SRC>   NS  </SRC>
+          </EVENT>
+        </LISTENTO>
+      </mcc>
+    </PlugIns>
+    
+		<Message>
+			<BeginExpt>
+				o2grating: Press Enter to Start....
+			</BeginExpt>
+			<EndExpt>
+				o2grating: This is the end....
+			</EndExpt>
+		</Message>
+
+		<Design>
+			<ITIDURATION>			500  </ITIDURATION>
+			<TRIALDURATION>		1000  </TRIALDURATION>
+		</Design>
+    
+		<Window>
+      <XPixels>     1024 </XPixels>
+			<YPixels>     768     </YPixels>
+			<Width>       40     </Width>
+			<Height>      30     </Height>
+
+      <!-- XPixels>     1280  </XPixels>
+			<YPixels>     1024  </YPixels>
+			<Width>       51.0  </Width>
+			<Height>      40.8  </Height -->
+      
+			<XOrigin>     0  </XOrigin>
+			<YOrigin>     0  </YOrigin>
+      
+			<Projection>
+				<Far>       100  </Far>
+				<Near>     -100  </Near>
+			</Projection>
+      
+			<FullScreen>  0   </FullScreen>
+			<FrameRate>   60  </FrameRate>
+
+			<!-- 
+			IMPORTANT:  to avoid spatial distortion, the window width and height
+									MUST have the same aspect ratio as XPixels and YPixels.
+
+									The best approach is to measure one dimension of the
+									screen precisely in cm or deg, then use the pixel aspect
+									ratio to set the other dimension
+
+									There is no cost to being precise!, give 4 decimal places
+									or so.
+			-->
+
+			<Background>
+				<XCIE>      0.33  </XCIE>
+				<YCIE>      0.33  </YCIE>
+				<Luminance> 30    </Luminance>
+			</Background>
+		</Window>
+
+		<Console>
+			<XOrigin>    -1680  </XOrigin>
+			<YOrigin>     0     </YOrigin>
+		</Console>
+
+		<Directories>
+			<Output>      C:\Temp\  </Output>
+			<DLL>         ..\dlls\  </DLL>
+		</Directories>
+	</Controller>
+
+	<Design>
+		<Stimuli>
+			<Stimulus Name="mygrating" dll="o2grating">
+				<Default>
+         	<stencilBit>     1  </stencilBit>
+          <outerDiam>      20.0  </outerDiam>
+          
+          <!-- innerDiam = 0 produces a circular aperture,
+               innerDiam > 0 produces an annulus -->
+          <innerDiam>			 0.0  </innerDiam>
+
+					<!-- parameters for the carrier grating -->
+          <carrier>
+					  <!-- carrier orientation (in degrees) -->
+						<orientation>  0  </orientation>
+					
+						<!-- carrier spatial frequency
+						     (cycles per unit, e.g. per degree or per cm) -->
+						<spatialFreq>  2  </spatialFreq>
+
+						<!-- carrier spatial phase (in degrees) -->
+						<spatialPhase> 0  </spatialPhase>
+
+						<!-- carrier contrast (between 0.0 and 1.0) -->
+						<contrast>     0.5  </contrast>
+					</carrier>
+
+					<!-- parameters for the envelope -->
+					<envelope>
+						<!-- envelope orientation (in degrees) -->
+						<orientation>  0  </orientation>
+
+						<!-- envelope spatial frequency (cycles per unit) -->
+						<spatialFreq>  0  </spatialFreq>
+
+						<!-- envelope spatial phase (in degrees) -->
+						<spatialPhase> 0  </spatialPhase>
+          </envelope>
+
+					<!-- mean luminance of the stimulus (-1 = background luminance) -->
+					<meanLum>       -1  </meanLum>
+
+					<!-- stimulus position -->
+					<X>              0  </X>
+					<Y>              0  </Y>
+
+					<on>             0  </on>
+					<off>            9999 </off>
+
+				</Default>
+			</Stimulus>
+		</Stimuli>
+
+		<Conditions>
+      <Factorial Name="o2rfMap" Levels="6,4,2">
+        <Factor1 Name="carrierOrientation">
+          <mygrating>
+            <carrier:orientation> 0 | 30 | 60 | 90 | 120 | 150 </carrier:orientation>
+          </mygrating>
+        </Factor1>
+        
+        <Factor2 Name="envelopeOrientation">
+          <mygrating>
+            <envelope:orientation> 0 | 45 | 90 | 135 </envelope:orientation>
+          </mygrating>
+        </Factor2>
+
+        <Factor3 Name="envelopeSpatialFrequency">
+          <mygrating>
+            <envelope:spatialFreq> 0.2 | 0.5 </envelope:spatialFreq>
+          </mygrating>
+        </Factor3>
+        
+      </Factorial>
+      
+			<!-- Factorial Name="o2rfMap" Levels="6,4,4,4">
+				<Factor1 Name="carrierOrientation">
+					<mygrating>
+            <carrier:orientation> 0 | 30 | 60 | 90 | 120 | 150 </carrier:orientation>
+          </mygrating>
+        </Factor1>
+
+        <Factor2 Name="envelopeOrientation">
+          <mygrating>
+            <envelope:orientation> 0 | 45 | 90 | 135 </envelope:orientation>
+          </mygrating>
+        </Factor2>
+
+        <Factor3 Name="envelopeSpatialFrequency">
+          <mygrating>
+            <envelope:spatialFreq> 0.1 | 0.2 | 0.5 | 1.0 </envelope:spatialFreq>
+          </mygrating>
+        </Factor3>
+ 
+				<Factor4 Name="elvelopeSpatialPhase">
+          <mygrating>
+            <envelope:spatialPhase> 0 | 45 | 90 | 135 </envelope:spatialPhase>
+          </mygrating>
+        </Factor4>
+      </Factorial -->
+		</Conditions>
+       
+    <Blocks>
+			<Block Randomize="WithoutReplacement" Retry="RandomInBlock" Repeats="100">
+        <o2rfMap/>
+			</Block>
+		</Blocks>
+	</Design>
+
+</Experiment>
+
+
