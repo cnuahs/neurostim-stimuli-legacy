@@ -1,6 +1,6 @@
 // o2grating.cpp - static 2nd-order grating stimulus
 
-// 20/9/2014 - Shaun L. Cloherty <s.cloherty@ieee.org>
+// 24/9/2014 - Shaun L. Cloherty <s.cloherty@ieee.org>
 
 #include "o2grating.h"
 #include "neurostim.h"
@@ -183,7 +183,7 @@ void o2grating::calcLumVals()
 			x_prime = cos(eOri)*xPix + sin(eOri)*yPix;
 
 			// apply envelope
-			tmpLum = tmpLum * (0.5*cos(2 * PI * eSF * x_prime + eSP) + 1.0);
+			tmpLum = tmpLum * 0.5*(cos(2 * PI * eSF * x_prime + eSP) + 1.0);
 
 			// assign luminance profile to the current row
 			yLum.push_back(tmpLum);
