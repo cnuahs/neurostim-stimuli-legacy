@@ -29,7 +29,7 @@ class o2grating:
 		// keyboard handler
 //		void keyboard(const unsigned char key, const int x, const int y);
 
-		void cleanUp(); // called after the end of each trial?
+//		void cleanUp(); // called after the end of each trial?
 
 		void fixPosition();
 
@@ -63,7 +63,7 @@ class o2grating:
 
 		void calcLumVals(); // calculates luminance values in lumVals
 
-		void convertToLum(); // FIXME: merge into calcLumVals()?
+//		void convertToLum(); // DEPRECATED
 
 		// fancy OpenGL stuff...?
 		GLdouble texProp;

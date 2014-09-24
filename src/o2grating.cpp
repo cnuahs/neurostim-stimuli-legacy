@@ -101,7 +101,7 @@ void o2grating::setup()
 	calcLumVals();
 
 	// apply contrast and convert to luminance values (set mean luminance, etc.)
-	convertToLum(); // FIXME: merge into calcLumVals()?
+//	convertToLum();
 
 	//	tic();
 	calcTexture();
@@ -144,11 +144,10 @@ void o2grating::draw()
 //
 //}
 
-void o2grating::cleanUp()
-{
-	// clear lumVals before the next trial/condition
-//	lumVals.clear();
-}
+//void o2grating::cleanUp()
+//{
+//
+//}
 
 // FIXME: this is a bit of a misnomer, lumVals as calculated here is more like Pelli's
 //        contrast function rather than a luminance function
@@ -166,6 +165,8 @@ void o2grating::calcLumVals()
 	double eSF = eSpatialFreq/pixPerUnit; // cycles per pixel
     double eSP = deg2rad(eSpatialPhase);
 
+	double mn = int(meanLum) == -1 ? nsGlobal->getFloat("WINDOW:BACKGROUND:LUMINANCE") : meanLum; // mean luminance, -1 = background
+
 	lumVals.clear(); // FIXME: nasty hack!?
 	for (int xPix = -imageHalfWidth; xPix <= imageHalfWidth; xPix++) {
 		for (int yPix = -imageHalfWidth; yPix <= imageHalfWidth; yPix++) {
@@ -182,6 +183,9 @@ void o2grating::calcLumVals()
 			// apply envelope
 			tmpLum = tmpLum * 0.5*(cos(2 * PI * eSF * x_prime + eSP) + 1.0);
 
+            // apply contrast and convert to luminance values
+			tmpLum = mn*(1 + cContrast * tmpLum); // from onvertToLum()
+
 			// assign luminance profile to the current row
 			yLum.push_back(tmpLum);
 		}
@@ -194,19 +198,20 @@ void o2grating::calcLumVals()
 	}
 }
 
-void o2grating::convertToLum()
-{
-	unsigned int xInd, yInd;
-
-    double mn = int(meanLum) == -1 ? nsGlobal->getFloat("WINDOW:BACKGROUND:LUMINANCE") : meanLum; // mean luminance, -1 = background
-
-	for (xInd = 0; xInd < lumVals.size(); xInd++) {
-		for (yInd = 0; yInd < lumVals.size(); yInd++) {
-			// apply contrast and convert to luminance values
-			lumVals[xInd][yInd] = mn*(1 + cContrast * lumVals[xInd][yInd]);
-		}
-	}
-}
+// DEPRECATED
+//void o2grating::convertToLum()
+//{
+//	unsigned int xInd, yInd;
+//
+//    double mn = int(meanLum) == -1 ? nsGlobal->getFloat("WINDOW:BACKGROUND:LUMINANCE") : meanLum; // mean luminance, -1 = background
+//
+//	for (xInd = 0; xInd < lumVals.size(); xInd++) {
+//		for (yInd = 0; yInd < lumVals.size(); yInd++) {
+//			// apply contrast and convert to luminance values
+//			lumVals[xInd][yInd] = mn*(1 + cContrast * lumVals[xInd][yInd]);
+//		}
+//	}
+//}
 
 void o2grating::calcTexture()
 {
