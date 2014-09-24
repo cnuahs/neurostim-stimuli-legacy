@@ -16,12 +16,15 @@ o2grating::o2grating()
 	name = "o2grating"; 
 
 //	rcsVersion = ""; // FIXME: add git tag info here...?
+
+	// generate the OpenGL texture
+	glGenTextures(1,textureName);
 }
 
 o2grating::~o2grating()
 {
-	// destroy the OpenGL texture to free video memory
-//	glDeleteTextures(1,textureName);
+	// delete the OpenGL texture
+	glDeleteTextures(1,textureName);
 }
 
 void o2grating::setup()
@@ -100,9 +103,6 @@ void o2grating::setup()
 	// apply contrast and convert to luminance values (set mean luminance, etc.)
 	convertToLum(); // FIXME: merge into calcLumVals()?
 
-	// generate the OpenGL texture
-	glGenTextures(1,textureName);
-
 	//	tic();
 	calcTexture();
 	//	float elapsedTime=toc();
@@ -148,9 +148,6 @@ void o2grating::cleanUp()
 {
 	// clear lumVals before the next trial/condition
 //	lumVals.clear();
-
-	// destroy the OpenGL texture to free video memory
-	glDeleteTextures(1,textureName);
 }
 
 // FIXME: this is a bit of a misnomer, lumVals as calculated here is more like Pelli's
