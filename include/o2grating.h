@@ -8,7 +8,7 @@
 // include the neurostim header
 #include "neurostim.h"
 
-#include <string>
+//#include <string>
 
 // new stimulus class is derived from the nsStimulus class
 class o2grating:
@@ -69,7 +69,10 @@ class o2grating:
 		GLdouble texProp;
 		GLuint textureName[1];
 		static const int NRTEXELS = 1024;
-		GLfloat texture[NRTEXELS][NRTEXELS][3];
+//		GLfloat texture[NRTEXELS][NRTEXELS][3];
+		GLfloat *texture;
+
+		std::vector<GLfloat *> texPtrs; // pointers to pre-computed "textures"
 
 		std::string errorMsg;
 		void calcTexture(); // calculates R,G,B values in texture

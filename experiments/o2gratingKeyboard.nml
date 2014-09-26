@@ -24,7 +24,7 @@
 		</Message>
 
 		<Design>
-			<ITIDURATION>			500  </ITIDURATION>
+			<ITIDURATION>			1000  </ITIDURATION>
 			<TRIALDURATION>		1000  </TRIALDURATION>
 		</Design>
     
@@ -63,20 +63,20 @@
 			-->
 
 			<Background>
-				<XCIE>      0.33  </XCIE>
-				<YCIE>      0.33  </YCIE>
+				<XCIE>      -1  </XCIE>
+				<YCIE>      -1  </YCIE>
 				<Luminance> 30    </Luminance>
 			</Background>
 		</Window>
 
 		<Console>
-			<XOrigin>    -1680  </XOrigin>
-			<YOrigin>     0     </YOrigin>
+			<XOrigin>     680  </XOrigin>
+			<YOrigin>     256     </YOrigin>
 		</Console>
 
 		<Directories>
 			<Output>      C:\Temp\  </Output>
-			<DLL>         ..\dlls\  </DLL>
+      <DLL>         C:\Neurostim Stimuli\Stimuli\dlls\  </DLL>
 		</Directories>
 	</Controller>
 
@@ -122,6 +122,11 @@
 					<!-- mean luminance of the stimulus (-1 = background luminance) -->
 					<meanLum>       -1  </meanLum>
 
+          <CIE>
+            <XCIE>         -1  </XCIE>
+            <YCIE>         -1  </YCIE>
+          </CIE>
+          
 					<!-- stimulus position -->
 					<X>              0  </X>
 					<Y>              0  </Y>
@@ -134,7 +139,7 @@
 		</Stimuli>
 
 		<Conditions>
-      <Factorial Name="o2rfMap" Levels="6,4,2">
+      <Factorial Name="o2rfMap" Levels="6,4,2,1">
         <Factor1 Name="carrierOrientation">
           <mygrating>
             <carrier:orientation> 0 | 30 | 60 | 90 | 120 | 150 </carrier:orientation>
@@ -152,38 +157,50 @@
             <envelope:spatialFreq> 0.2 | 0.5 </envelope:spatialFreq>
           </mygrating>
         </Factor3>
-        
+
+        <Factor4 Name="envelopeSpatialPhase">
+          <mygrating>
+            <envelope:spatialPhase> 0 </envelope:spatialPhase>
+          </mygrating>
+        </Factor4>
       </Factorial>
-      
-			<!-- Factorial Name="o2rfMap" Levels="6,4,4,4">
+
+      <!-- WARNING: this is likely to take a LOOOOOONG time to pre-compute the stimulus images... -->
+			<!-- Factorial Name="o2rfMap" Levels="6,4,4,4,6">
 				<Factor1 Name="carrierOrientation">
 					<mygrating>
             <carrier:orientation> 0 | 30 | 60 | 90 | 120 | 150 </carrier:orientation>
           </mygrating>
         </Factor1>
 
-        <Factor2 Name="envelopeOrientation">
+        <Factor2 Name="carrierSpatialPhase">
           <mygrating>
-            <envelope:orientation> 0 | 45 | 90 | 135 </envelope:orientation>
+            <carrier:spatialPhase> 0 | 45 | 90 | 135 </carrier:spatialPhase>
           </mygrating>
         </Factor2>
 
-        <Factor3 Name="envelopeSpatialFrequency">
+        <Factor3 Name="envelopeOrientation">
+          <mygrating>
+            <envelope:orientation> 0 | 45 | 90 | 135 </envelope:orientation>
+          </mygrating>
+        </Factor3>
+
+        <Factor4 Name="envelopeSpatialFrequency">
           <mygrating>
             <envelope:spatialFreq> 0.1 | 0.2 | 0.5 | 1.0 </envelope:spatialFreq>
           </mygrating>
-        </Factor3>
- 
-				<Factor4 Name="elvelopeSpatialPhase">
-          <mygrating>
-            <envelope:spatialPhase> 0 | 45 | 90 | 135 </envelope:spatialPhase>
-          </mygrating>
         </Factor4>
+ 
+				<Factor5 Name="elvelopeSpatialPhase">
+          <mygrating>
+            <envelope:spatialPhase> 0 | 30 | 60 | 90 | 120 | 150 </envelope:spatialPhase>
+          </mygrating>
+        </Factor5>
       </Factorial -->
 		</Conditions>
        
     <Blocks>
-			<Block Randomize="WithoutReplacement" Retry="RandomInBlock" Repeats="100">
+			<Block Randomize="WithoutReplacement" Retry="RandomInBlock" Repeats="10">
         <o2rfMap/>
 			</Block>
 		</Blocks>

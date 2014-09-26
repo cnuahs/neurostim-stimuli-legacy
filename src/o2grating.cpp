@@ -2,6 +2,8 @@
 
 // 24/9/2014 - Shaun L. Cloherty <s.cloherty@ieee.org>
 
+#include <stdio.h> // NULL
+
 #include "o2grating.h"
 #include "neurostim.h"
 
@@ -23,12 +25,42 @@ o2grating::o2grating()
 
 o2grating::~o2grating()
 {
+	for (unsigned int i = 0; i < texPtrs.size(); i++) {
+		free(texPtrs[i]);
+	}
+
 	// delete the OpenGL texture
 	glDeleteTextures(1,textureName);
 }
 
 void o2grating::setup()
 {
+	float elapsedTime;
+
+	if (trial > 0) {
+		tic();
+		errLog << "Showing config " << config << " of " << texPtrs.size() << endl;
+
+		texture = texPtrs[config-1];
+
+		// bind the texture... was in calcTexture()
+		glBindTexture(GL_TEXTURE_2D,textureName[0]);
+		glPixelStorei(GL_UNPACK_ALIGNMENT, 1);
+		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+		glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, NRTEXELS, NRTEXELS, 0, GL_RGB, GL_FLOAT, texture);          
+		glTexEnvf(GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_REPLACE);
+
+		elapsedTime = toc();
+		errLog << "setup() took " << elapsedTime << "ms" << endl;
+		return;
+	}
+
+	//
+	// note: the code below runs only during Neurostim's check of each stimulus
+	//       configuration (indicated by trial = -1, condition = -1 and block = -1)
+	//
+
 	// get window dimensions in pixels
 	float wPix = nsGlobal->getFloat("Window:XPixels");
 	float hPix = nsGlobal->getFloat("Window:YPixels");
@@ -97,17 +129,31 @@ void o2grating::setup()
 	// calculate proportion of the texture containing the image
 	texProp = double(imageSize)/double(NRTEXELS);
 
+	// pre-allocate and compute textures/images...
+	if (texPtrs.size() < config) {
+		errLog << "Extending texPtrs to store " << config << " configurations." << endl;
+
+		texture = (GLfloat *)malloc(NRTEXELS*NRTEXELS*3*sizeof(GLfloat));
+
+		// FIXME: this assumes that Neurostim tests configurations in
+		//        numerical order... which it seems to do.
+        texPtrs.push_back(texture);
+	}
+	texture = texPtrs[config-1]; // set texture before calling calcTexture() below 
+
 	// calculate the texture
+//	tic();
 	calcLumVals();
+//	elapsedTime = toc();
+//	errLog << "calcLumVals() took " << elapsedTime << "ms" << endl;
+//	write("CALCLUMVALSTIME",elapsedTime);
 
-	// apply contrast and convert to luminance values (set mean luminance, etc.)
-//	convertToLum();
-
-	//	tic();
+//	tic();
 	calcTexture();
-	//	float elapsedTime=toc();
-	//	errLog<<"Time to create texture "<< elapsedTime <<endl;
-	
+//	elapsedTime = toc();
+//	errLog << "calcTexture() took " << elapsedTime << endl;
+//	write("CALCTEXTURETIME",elapsedTime);
+
 	fixPosition(); // round position to nearest pixel
 
 	if (!errorMsg.empty()) {
@@ -149,8 +195,6 @@ void o2grating::draw()
 //
 //}
 
-// FIXME: this is a bit of a misnomer, lumVals as calculated here is more like Pelli's
-//        contrast function rather than a luminance function
 void o2grating::calcLumVals()
 {
 	// calculate the luminance value of each pixel in the texture
@@ -184,7 +228,7 @@ void o2grating::calcLumVals()
 			tmpLum = tmpLum * 0.5*(cos(2 * PI * eSF * x_prime + eSP) + 1.0);
 
             // apply contrast and convert to luminance values
-			tmpLum = mn*(1 + cContrast * tmpLum); // from onvertToLum()
+			tmpLum = mn*(1 + cContrast * tmpLum); // from convertToLum()
 
 			// assign luminance profile to the current row
 			yLum.push_back(tmpLum);
@@ -235,18 +279,27 @@ void o2grating::calcTexture()
 				errorMsg = "Error converting lum to RGB: out of mon range?";
 			}
 
-			texture[xInd][yInd][0]=GLfloat(r);
-			texture[xInd][yInd][1]=GLfloat(g);
-			texture[xInd][yInd][2]=GLfloat(b);
+//			texture[xInd][yInd][0]=GLfloat(r);
+//			texture[xInd][yInd][1]=GLfloat(g);
+//			texture[xInd][yInd][2]=GLfloat(b);
+
+			// note: arrays (and vectors) are stored in row-major. Therefore, if
+			//
+			//       T x[D][H][W];
+			//
+			//       x[i][j][k] == *(x + i*W*H + j*W + k)
+			*(texture + (xInd*3*NRTEXELS) + (yInd*3) + 0) = GLfloat(r);
+			*(texture + (xInd*3*NRTEXELS) + (yInd*3) + 1) = GLfloat(g);
+			*(texture + (xInd*3*NRTEXELS) + (yInd*3) + 2) = GLfloat(b);
 		}
 	}
 
-	glBindTexture(GL_TEXTURE_2D,textureName[0]);
-	glPixelStorei(GL_UNPACK_ALIGNMENT, 1);
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
-	glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, NRTEXELS, NRTEXELS, 0, GL_RGB, GL_FLOAT, texture);          
-	glTexEnvf(GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_REPLACE);
+//	glBindTexture(GL_TEXTURE_2D,textureName[0]);
+//	glPixelStorei(GL_UNPACK_ALIGNMENT, 1);
+//	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+//	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+//	glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, NRTEXELS, NRTEXELS, 0, GL_RGB, GL_FLOAT, texture);          
+//	glTexEnvf(GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_REPLACE);
 }
 
 // note: this method tweaks the values of X and Y inherited from nsStimulus, rounding
