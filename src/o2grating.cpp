@@ -106,55 +106,60 @@ void o2grating::setup()
 	// calculate proportion of the texture containing the image
 	texProp = double(imageSize)/double(NRTEXELS);
 
-	// pre-compute all gratings if requested (saves time during trials, but slow to start and can take up too much RAM)
-	if (preCompute & (trial < 0)){
+	if (trial < 0) {
 		// note: this code runs only during Neurostim's check of each stimulus
-		//       configuration prior to running real trials (indicated by trial = -1, condition = -1 and block = -1)
+		//       configuration prior to running real trials (indicated by trial = -1,
+		//       condition = -1 and block = -1)
 		
-		// Store the pointers
-		if (texPtrs.size() < config) {
-			errLog << "Extending texPtrs to store " << config << " configurations." << endl;
-			
-			// allocate memory for the current texture
-			texture = (GLfloat *)malloc(NRTEXELS*NRTEXELS*3*sizeof(GLfloat));
+		// allocate memory for the current texture
+		texture = (GLfloat *)malloc(NRTEXELS*NRTEXELS*3*sizeof(GLfloat));
+		
+		// calculate the texture
+		calcLumVals();
+		calcTexture();
 
-			// FIXME: this assumes that Neurostim tests configurations in
-			//        numerical order... which it seems to do.
-			texPtrs.push_back(texture);
+		if (preCompute) {
+			// store texture pointer
+			if (texPtrs.size() < config) {
+				errLog << "Extending texPtrs to store " << config << " configurations." << endl;
+			
+				// FIXME: this assumes that Neurostim tests configurations in
+				//        numerical order... which it seems to do.
+				texPtrs.push_back(texture);
+			}
+		} else {
+			free(texture);
 		}
-		texture = texPtrs[config-1]; // set texture before calling calcTexture() below
+
+		return;
+	}
+
+	// now we're rockin' in the real world... by which I mean that real trials have started (i.e., trial > 0)
+	tic();
+	errLog << "Showing config " << config << " of " << texPtrs.size() << endl;
+
+	if (preCompute){
+		// point to the right texture
+		texture = texPtrs[config-1];
+	} else {
+		// allocate memory for the texture
+		texture = (GLfloat *)malloc(NRTEXELS*NRTEXELS*3*sizeof(GLfloat));
 
 		// calculate the texture
 		calcLumVals();
 		calcTexture();
 	}
 
-	// now we're rockin' in the real world... by which I mean that real trials have started
-	if (trial > 0) {
-		tic();
-		errLog << "Showing config " << config << " of " << texPtrs.size() << endl;
+	// bind the texture... was in calcTexture()
+	glBindTexture(GL_TEXTURE_2D,textureName[0]);
+	glPixelStorei(GL_UNPACK_ALIGNMENT, 1);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+	glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, NRTEXELS, NRTEXELS, 0, GL_RGB, GL_FLOAT, texture);          
+	glTexEnvf(GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_REPLACE);
 
-		if (preCompute){
-			//Point to the right texture
-			texture = texPtrs[config-1];
-		} else {
-			//Texture not made yet. Do it.
-			texture = (GLfloat *)malloc(NRTEXELS*NRTEXELS*3*sizeof(GLfloat));
-			calcLumVals();
-			calcTexture();
-		}
-
-		// bind the texture... was in calcTexture()
-		glBindTexture(GL_TEXTURE_2D,textureName[0]);
-		glPixelStorei(GL_UNPACK_ALIGNMENT, 1);
-		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
-		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
-		glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, NRTEXELS, NRTEXELS, 0, GL_RGB, GL_FLOAT, texture);          
-		glTexEnvf(GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_REPLACE);
-
-		elapsedTime = toc();
-		errLog << "setup() took " << elapsedTime << "ms" << endl;
-	}
+	elapsedTime = toc();
+	errLog << "setup() took " << elapsedTime << "ms" << endl;
 
 	if (!errorMsg.empty()) {
 		warning(errorMsg);
