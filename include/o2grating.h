@@ -1,6 +1,6 @@
 // o2grating.h - static 2nd-order grating stimulus
 
-// 20/9/2014 - Shaun L. Cloherty <s.cloherty@ieee.org>
+// 1/10/2014 - Shaun L. Cloherty <s.cloherty@ieee.org>
 
 #if !defined(_o2grating_H)
 #define _o2grating_H
@@ -29,7 +29,7 @@ class o2grating:
 		// keyboard handler
 //		void keyboard(const unsigned char key, const int x, const int y);
 
-//		void cleanUp(); // called after the end of each trial?
+		void cleanUp(); // called after the end of each trial?
 
 		void fixPosition();
 
@@ -51,7 +51,6 @@ class o2grating:
 		nsDouble cSpatialFreq;
 		nsDouble cOrientation;
 		nsDouble cSpatialPhase;
-
 		nsDouble cContrast;
 
 		// parameters defining the envelope
@@ -63,7 +62,7 @@ class o2grating:
 
 		void calcLumVals(); // calculates luminance values in lumVals
 
-//		void convertToLum(); // DEPRECATED
+		bool preCompute;
 
 		// fancy OpenGL stuff...?
 		GLdouble texProp;

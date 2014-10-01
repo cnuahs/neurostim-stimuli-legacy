@@ -1,6 +1,6 @@
 // o2grating.cpp - static 2nd-order grating stimulus
 
-// 24/9/2014 - Shaun L. Cloherty <s.cloherty@ieee.org>
+// 1/10/2014 - Shaun L. Cloherty <s.cloherty@ieee.org>
 
 #include <stdio.h> // NULL
 
@@ -28,6 +28,7 @@ o2grating::~o2grating()
 	for (unsigned int i = 0; i < texPtrs.size(); i++) {
 		free(texPtrs[i]);
 	}
+//	texPtrs.clear(); // ?
 
 	// delete the OpenGL texture
 	glDeleteTextures(1,textureName);
@@ -37,29 +38,28 @@ void o2grating::setup()
 {
 	float elapsedTime;
 
-	if (trial > 0) {
-		tic();
-		errLog << "Showing config " << config << " of " << texPtrs.size() << endl;
+	// aperture parameters
+	stencilBit = getParmInt("stencilBit",1); // (1-8) each texture drawn simultaneously should have a different stencilBit value
+	outerDiam = getParm("outerDiam",10.0); // outer diameter for the circular or annular aperture
+	innerDiam = getParm("innerDiam",0.0); // inner diameter for the annular aperture
 
-		texture = texPtrs[config-1];
+	// parameters defining the carrier grating
+	cOrientation = getParm("carrier:orientation",0);
+	cSpatialFreq = getParm("carrier:spatialFreq",0);
+	cSpatialPhase = getParm("carrier:spatialPhase",0);
+	cContrast = getParm("carrier:contrast",0.5);
 
-		// bind the texture... was in calcTexture()
-		glBindTexture(GL_TEXTURE_2D,textureName[0]);
-		glPixelStorei(GL_UNPACK_ALIGNMENT, 1);
-		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
-		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
-		glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, NRTEXELS, NRTEXELS, 0, GL_RGB, GL_FLOAT, texture);          
-		glTexEnvf(GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_REPLACE);
+	// parameters defining the envelope
+	eOrientation = getParm("envelope:orientation",0);
+	eSpatialFreq = getParm("envelope:spatialFreq",0);
+	eSpatialPhase = getParm("envelope:spatialPhase",0);
 
-		elapsedTime = toc();
-		errLog << "setup() took " << elapsedTime << "ms" << endl;
-		return;
-	}
+	meanLum = getParm("meanLum",-1); // -1 = background luminance
 
-	//
-	// note: the code below runs only during Neurostim's check of each stimulus
-	//       configuration (indicated by trial = -1, condition = -1 and block = -1)
-	//
+	preCompute = getParmBool("preCompute",true);
+
+	xCIE = getParm("CIE:xCIE",nsGlobal->getDouble("WINDOW:BACKGROUND:XCIE"));  // -1 = monitor white
+	yCIE = getParm("CIE:yCIE",nsGlobal->getDouble("WINDOW:BACKGROUND:YCIE"));  // -1 = monitor white
 
 	// get window dimensions in pixels
 	float wPix = nsGlobal->getFloat("Window:XPixels");
@@ -77,29 +77,6 @@ void o2grating::setup()
 	}
 
 	pixPerUnit = ((wPix/wUnits)+(hPix/hUnits))/2;
-
-	// aperture parameters
-	stencilBit = getParmInt("stencilBit",1); // (1-8) each texture drawn simultaneously should have a different stencilBit value
-
-	outerDiam = getParm("outerDiam",10.0); // outer diameter for the circular or annular aperture
-	innerDiam = getParm("innerDiam",0.0); // inner diameter for the annular aperture
-
-	// parameters defining the carrier grating
-	cOrientation = getParm("carrier:orientation",0);
-	cSpatialFreq = getParm("carrier:spatialFreq",0);
-	cSpatialPhase = getParm("carrier:spatialPhase",0);
-
-	cContrast = getParm("carrier:contrast",0.5);
-
-	// parameters defining the envelope
-	eOrientation = getParm("envelope:orientation",0);
-	eSpatialFreq = getParm("envelope:spatialFreq",0);
-	eSpatialPhase = getParm("envelope:spatialPhase",0);
-
-	meanLum = getParm("meanLum",-1); // -1 = background luminance
-
-	xCIE = getParm("CIE:xCIE",nsGlobal->getDouble("WINDOW:BACKGROUND:XCIE"));  // -1 = monitor white
-	yCIE = getParm("CIE:yCIE",nsGlobal->getDouble("WINDOW:BACKGROUND:YCIE"));  // -1 = monitor white
 
 	// set aperture
 	vector<double> args;
@@ -129,37 +106,59 @@ void o2grating::setup()
 	// calculate proportion of the texture containing the image
 	texProp = double(imageSize)/double(NRTEXELS);
 
-	// pre-allocate and compute textures/images...
-	if (texPtrs.size() < config) {
-		errLog << "Extending texPtrs to store " << config << " configurations." << endl;
+	// pre-compute all gratings if requested (saves time during trials, but slow to start and can take up too much RAM)
+	if (preCompute & (trial < 0)){
+		// note: this code runs only during Neurostim's check of each stimulus
+		//       configuration prior to running real trials (indicated by trial = -1, condition = -1 and block = -1)
+		
+		// Store the pointers
+		if (texPtrs.size() < config) {
+			errLog << "Extending texPtrs to store " << config << " configurations." << endl;
+			
+			// allocate memory for the current texture
+			texture = (GLfloat *)malloc(NRTEXELS*NRTEXELS*3*sizeof(GLfloat));
 
-		texture = (GLfloat *)malloc(NRTEXELS*NRTEXELS*3*sizeof(GLfloat));
+			// FIXME: this assumes that Neurostim tests configurations in
+			//        numerical order... which it seems to do.
+			texPtrs.push_back(texture);
+		}
+		texture = texPtrs[config-1]; // set texture before calling calcTexture() below
 
-		// FIXME: this assumes that Neurostim tests configurations in
-		//        numerical order... which it seems to do.
-        texPtrs.push_back(texture);
+		// calculate the texture
+		calcLumVals();
+		calcTexture();
 	}
-	texture = texPtrs[config-1]; // set texture before calling calcTexture() below 
 
-	// calculate the texture
-//	tic();
-	calcLumVals();
-//	elapsedTime = toc();
-//	errLog << "calcLumVals() took " << elapsedTime << "ms" << endl;
-//	write("CALCLUMVALSTIME",elapsedTime);
+	// now we're rockin' in the real world... by which I mean that real trials have started
+	if (trial > 0) {
+		tic();
+		errLog << "Showing config " << config << " of " << texPtrs.size() << endl;
 
-//	tic();
-	calcTexture();
-//	elapsedTime = toc();
-//	errLog << "calcTexture() took " << elapsedTime << endl;
-//	write("CALCTEXTURETIME",elapsedTime);
+		if (preCompute){
+			//Point to the right texture
+			texture = texPtrs[config-1];
+		} else {
+			//Texture not made yet. Do it.
+			texture = (GLfloat *)malloc(NRTEXELS*NRTEXELS*3*sizeof(GLfloat));
+			calcLumVals();
+			calcTexture();
+		}
 
-	fixPosition(); // round position to nearest pixel
+		// bind the texture... was in calcTexture()
+		glBindTexture(GL_TEXTURE_2D,textureName[0]);
+		glPixelStorei(GL_UNPACK_ALIGNMENT, 1);
+		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+		glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, NRTEXELS, NRTEXELS, 0, GL_RGB, GL_FLOAT, texture);          
+		glTexEnvf(GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_REPLACE);
+
+		elapsedTime = toc();
+		errLog << "setup() took " << elapsedTime << "ms" << endl;
+	}
 
 	if (!errorMsg.empty()) {
 		warning(errorMsg);
 	}
-
 	return;
 }
 
@@ -185,15 +184,12 @@ void o2grating::draw()
 	glMatrixMode(GL_MODELVIEW);
 }
 
-//void o2grating::keyboard(const unsigned char key, const int x, const int y)
-//{
-//
-//}
-
-//void o2grating::cleanUp()
-//{
-//
-//}
+void o2grating::cleanUp()
+{
+	if (!preCompute){
+		free(texture);
+	}
+}
 
 void o2grating::calcLumVals()
 {
@@ -242,21 +238,6 @@ void o2grating::calcLumVals()
 	}
 }
 
-// DEPRECATED
-//void o2grating::convertToLum()
-//{
-//	unsigned int xInd, yInd;
-//
-//    double mn = int(meanLum) == -1 ? nsGlobal->getFloat("WINDOW:BACKGROUND:LUMINANCE") : meanLum; // mean luminance, -1 = background
-//
-//	for (xInd = 0; xInd < lumVals.size(); xInd++) {
-//		for (yInd = 0; yInd < lumVals.size(); yInd++) {
-//			// apply contrast and convert to luminance values
-//			lumVals[xInd][yInd] = mn*(1 + cContrast * lumVals[xInd][yInd]);
-//		}
-//	}
-//}
-
 void o2grating::calcTexture()
 {
 	// compute R,G,B value of each pixel in the texture
@@ -268,20 +249,10 @@ void o2grating::calcTexture()
 		for (yInd = 0; yInd < lumVals.size(); yInd++) {
 			// convert luminance to gun values
 			ok =  nsMon().chromLumToRGB(xCIE,yCIE,lumVals[xInd][yInd],r,g,b);
-
-//			if (getParmBool("CIE:USE",false)){
-//				ok = nsMon().chromLumToRGB(xCIE,yCIE,lumVals[xInd][yInd],r,g,b);
-//			}else {
-//				ok = nsMon().monitorWhiteToRGB(lumVals[xInd][yInd],r,g,b);
-//			}
 			
 			if (!ok) {
 				errorMsg = "Error converting lum to RGB: out of mon range?";
 			}
-
-//			texture[xInd][yInd][0]=GLfloat(r);
-//			texture[xInd][yInd][1]=GLfloat(g);
-//			texture[xInd][yInd][2]=GLfloat(b);
 
 			// note: arrays (and vectors) are stored in row-major. Therefore, if
 			//
@@ -293,13 +264,6 @@ void o2grating::calcTexture()
 			*(texture + (xInd*3*NRTEXELS) + (yInd*3) + 2) = GLfloat(b);
 		}
 	}
-
-//	glBindTexture(GL_TEXTURE_2D,textureName[0]);
-//	glPixelStorei(GL_UNPACK_ALIGNMENT, 1);
-//	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
-//	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
-//	glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, NRTEXELS, NRTEXELS, 0, GL_RGB, GL_FLOAT, texture);          
-//	glTexEnvf(GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_REPLACE);
 }
 
 // note: this method tweaks the values of X and Y inherited from nsStimulus, rounding
