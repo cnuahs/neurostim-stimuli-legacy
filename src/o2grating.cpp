@@ -28,7 +28,6 @@ o2grating::~o2grating()
 	for (unsigned int i = 0; i < texPtrs.size(); i++) {
 		free(texPtrs[i]);
 	}
-//	texPtrs.clear(); // ?
 
 	// delete the OpenGL texture
 	glDeleteTextures(1,textureName);
@@ -56,7 +55,7 @@ void o2grating::setup()
 
 	meanLum = getParm("meanLum",-1); // -1 = background luminance
 
-	preCompute = getParmBool("preCompute",true);
+	preCompute = getParm("preCompute",true);
 
 	xCIE = getParm("CIE:xCIE",nsGlobal->getDouble("WINDOW:BACKGROUND:XCIE"));  // -1 = monitor white
 	yCIE = getParm("CIE:yCIE",nsGlobal->getDouble("WINDOW:BACKGROUND:YCIE"));  // -1 = monitor white
@@ -78,6 +77,8 @@ void o2grating::setup()
 
 	pixPerUnit = ((wPix/wUnits)+(hPix/hUnits))/2;
 
+	fixPosition(); // round position to nearest pixel
+
 	// set aperture
 	vector<double> args;
 	args.push_back(stencilBit);
@@ -94,8 +95,8 @@ void o2grating::setup()
 
 	// calculate required image size (in pixels)
 	imageSize = int(floor(outerDiam*pixPerUnit));
-	if (imageSize >= NRTEXELS){
-		imageSize = NRTEXELS-1;
+	if (imageSize >= int(floor(hPix))) {
+		imageSize = int(floor(hPix))-1;
 	}
 	// make it odd (ensures it can be centered)
 	if ((imageSize % 2) == 0){
@@ -103,8 +104,8 @@ void o2grating::setup()
 	}
 	imageHalfWidth = int(floor(float(imageSize)/2));
 
-	// calculate proportion of the texture containing the image
-	texProp = double(imageSize)/double(NRTEXELS);
+	// proportion of the texture containing the image
+	texProp = 1.0; // by definition...
 
 	if (trial < 0) {
 		// note: this code runs only during Neurostim's check of each stimulus
@@ -112,8 +113,8 @@ void o2grating::setup()
 		//       condition = -1 and block = -1)
 		
 		// allocate memory for the current texture
-		texture = (GLfloat *)malloc(NRTEXELS*NRTEXELS*3*sizeof(GLfloat));
-		
+		texture = (GLfloat *)malloc(imageSize*imageSize*3*sizeof(GLfloat));
+
 		// calculate the texture
 		calcLumVals();
 		calcTexture();
@@ -128,7 +129,7 @@ void o2grating::setup()
 				texPtrs.push_back(texture);
 			}
 		} else {
-			free(texture);
+			free(texture); // note: cleanUp() is not called during config testing, so free() texture here
 		}
 
 		return;
@@ -143,7 +144,7 @@ void o2grating::setup()
 		texture = texPtrs[config-1];
 	} else {
 		// allocate memory for the texture
-		texture = (GLfloat *)malloc(NRTEXELS*NRTEXELS*3*sizeof(GLfloat));
+		texture = (GLfloat *)malloc(imageSize*imageSize*3*sizeof(GLfloat));
 
 		// calculate the texture
 		calcLumVals();
@@ -155,7 +156,7 @@ void o2grating::setup()
 	glPixelStorei(GL_UNPACK_ALIGNMENT, 1);
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
-	glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, NRTEXELS, NRTEXELS, 0, GL_RGB, GL_FLOAT, texture);          
+    glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, imageSize, imageSize, 0, GL_RGB, GL_FLOAT, texture);          
 	glTexEnvf(GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_REPLACE);
 
 	elapsedTime = toc();
@@ -264,9 +265,9 @@ void o2grating::calcTexture()
 			//       T x[D][H][W];
 			//
 			//       x[i][j][k] == *(x + i*W*H + j*W + k)
-			*(texture + (xInd*3*NRTEXELS) + (yInd*3) + 0) = GLfloat(r);
-			*(texture + (xInd*3*NRTEXELS) + (yInd*3) + 1) = GLfloat(g);
-			*(texture + (xInd*3*NRTEXELS) + (yInd*3) + 2) = GLfloat(b);
+			*(texture + (xInd*3*imageSize) + (yInd*3) + 0) = GLfloat(r);
+			*(texture + (xInd*3*imageSize) + (yInd*3) + 1) = GLfloat(g);
+			*(texture + (xInd*3*imageSize) + (yInd*3) + 2) = GLfloat(b);
 		}
 	}
 }

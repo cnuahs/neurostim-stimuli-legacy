@@ -13,139 +13,140 @@
         </LISTENTO>
       </mcc>
     </PlugIns>
-    
-		<Message>
-			<BeginExpt>
-				o2grating: Press Enter to Start....
-			</BeginExpt>
-			<EndExpt>
-				o2grating: This is the end....
-			</EndExpt>
-		</Message>
 
-		<Design>
-			<ITIDURATION>			1000  </ITIDURATION>
-			<TRIALDURATION>		1000  </TRIALDURATION>
-		</Design>
-    
-		<Window>
+    <Message>
+      <BeginExpt>
+        o2grating: Press Enter to start....
+      </BeginExpt>
+      <EndExpt>
+        o2grating: This is the end....
+      </EndExpt>
+    </Message>
+
+    <Design>
+      <ITIDURATION>			1000  </ITIDURATION>
+      <TRIALDURATION>		1000  </TRIALDURATION>
+    </Design>
+
+    <Window>
       <XPixels>     1024 </XPixels>
-			<YPixels>     768     </YPixels>
-			<Width>       40     </Width>
-			<Height>      30     </Height>
+      <YPixels>     768     </YPixels>
+      <Width>       40     </Width>
+      <Height>      30     </Height>
 
       <!-- XPixels>     1280  </XPixels>
-			<YPixels>     1024  </YPixels>
-			<Width>       51.0  </Width>
-			<Height>      40.8  </Height -->
-      
-			<XOrigin>     0  </XOrigin>
-			<YOrigin>     0  </YOrigin>
-      
-			<Projection>
-				<Far>       100  </Far>
-				<Near>     -100  </Near>
-			</Projection>
-      
-			<FullScreen>  0   </FullScreen>
-			<FrameRate>   60  </FrameRate>
+      <YPixels>     1024  </YPixels>
+      <Width>       51.0  </Width>
+      <Height>      40.8  </Height -->
 
-			<!-- 
-			IMPORTANT:  to avoid spatial distortion, the window width and height
-									MUST have the same aspect ratio as XPixels and YPixels.
+      <XOrigin>     0  </XOrigin>
+      <YOrigin>     0  </YOrigin>
 
-									The best approach is to measure one dimension of the
-									screen precisely in cm or deg, then use the pixel aspect
-									ratio to set the other dimension
+      <Projection>
+        <Far>       100  </Far>
+        <Near>     -100  </Near>
+      </Projection>
 
-									There is no cost to being precise!, give 4 decimal places
-									or so.
-			-->
+      <FullScreen>  0   </FullScreen>
+      <FrameRate>   60  </FrameRate>
 
-			<Background>
-				<XCIE>      -1  </XCIE>
-				<YCIE>      -1  </YCIE>
-				<Luminance> 30    </Luminance>
-			</Background>
-		</Window>
+      <!-- 
+      IMPORTANT:  to avoid spatial distortion, the window width and height
+                  MUST have the same aspect ratio as XPixels and YPixels.
 
-		<Console>
-			<XOrigin>     680  </XOrigin>
-			<YOrigin>     256     </YOrigin>
-		</Console>
+                  The best approach is to measure one dimension of the
+                  screen precisely in cm or deg, then use the pixel aspect
+                  ratio to set the other dimension
 
-		<Directories>
-			<Output>      C:\Temp\  </Output>
+                  There is no cost to being precise!, give 4 decimal places
+                  or so.
+      -->
+
+      <Background>
+        <XCIE>      -1  </XCIE>
+        <YCIE>      -1  </YCIE>
+        <Luminance> 30    </Luminance>
+      </Background>
+    </Window>
+
+    <Console>
+      <XOrigin>     680  </XOrigin>
+      <YOrigin>     256     </YOrigin>
+    </Console>
+
+    <Directories>
+      <Output>      C:\Temp\  </Output>
       <DLL>         C:\Neurostim Stimuli\Stimuli\dlls\  </DLL>
-		</Directories>
-	</Controller>
+    </Directories>
+  </Controller>
 
-	<Design>
-		<Stimuli>
-			<Stimulus Name="mygrating" dll="o2grating">
-				<Default>
-         	<stencilBit>     1  </stencilBit>
+  <Design>
+    <Stimuli>
+      <Stimulus Name="mygrating" dll="o2grating">
+        <Default>
+          <stencilBit>     1  </stencilBit>
           <outerDiam>      20.0  </outerDiam>
-          
+
           <!-- innerDiam = 0 produces a circular aperture,
                innerDiam > 0 produces an annulus -->
           <innerDiam>			 0.0  </innerDiam>
 
-					<!-- parameters for the carrier grating -->
+          <!-- parameters for the carrier grating -->
           <carrier>
-					  <!-- carrier orientation (in degrees) -->
-						<orientation>  0  </orientation>
-					
-						<!-- carrier spatial frequency
+            <!-- carrier orientation (in degrees) -->
+            <orientation>  0  </orientation>
+
+            <!-- carrier spatial frequency
 						     (cycles per unit, e.g. per degree or per cm) -->
-						<spatialFreq>  2  </spatialFreq>
+            <spatialFreq>  2  </spatialFreq>
 
-						<!-- carrier spatial phase (in degrees) -->
-						<spatialPhase> 0  </spatialPhase>
+            <!-- carrier spatial phase (in degrees) -->
+            <spatialPhase> 0  </spatialPhase>
 
-						<!-- carrier contrast (between 0.0 and 1.0) -->
-						<contrast>     0.5  </contrast>
-					</carrier>
+            <!-- carrier contrast (between 0.0 and 1.0) -->
+            <contrast>     0.5  </contrast>
+          </carrier>
 
-					<!-- parameters for the envelope -->
-					<envelope>
-						<!-- envelope orientation (in degrees) -->
-						<orientation>  0  </orientation>
+          <!-- parameters for the envelope -->
+          <envelope>
+            <!-- envelope orientation (in degrees) -->
+            <orientation>  0  </orientation>
 
-						<!-- envelope spatial frequency (cycles per unit) -->
-						<spatialFreq>  0  </spatialFreq>
+            <!-- envelope spatial frequency (cycles per unit) -->
+            <spatialFreq>  0  </spatialFreq>
 
-						<!-- envelope spatial phase (in degrees) -->
-						<spatialPhase> 0  </spatialPhase>
+            <!-- envelope spatial phase (in degrees) -->
+            <spatialPhase> 0  </spatialPhase>
           </envelope>
 
-					<!-- mean luminance of the stimulus (-1 = background luminance) -->
-					<meanLum>       -1  </meanLum>
+          <!-- mean luminance of the stimulus (-1 = background luminance) -->
+          <meanLum>       -1  </meanLum>
 
           <CIE>
             <XCIE>         -1  </XCIE>
             <YCIE>         -1  </YCIE>
           </CIE>
-          
-					<!-- stimulus position -->
-					<X>              0  </X>
-					<Y>              0  </Y>
 
-					<on>             0  </on>
-					<off>            9999 </off>
+          <!-- stimulus position -->
+          <X>              0  </X>
+          <Y>              0  </Y>
 
-				</Default>
-			</Stimulus>
-		</Stimuli>
+          <on>             0  </on>
+          <off>            9999 </off>
 
-		<Conditions>
+          <preCompute>     1  </preCompute>
+        </Default>
+      </Stimulus>
+    </Stimuli>
+
+    <Conditions>
       <Factorial Name="o2rfMap" Levels="6,4,2,1">
         <Factor1 Name="carrierOrientation">
           <mygrating>
             <carrier:orientation> 0 | 30 | 60 | 90 | 120 | 150 </carrier:orientation>
           </mygrating>
         </Factor1>
-        
+
         <Factor2 Name="envelopeOrientation">
           <mygrating>
             <envelope:orientation> 0 | 45 | 90 | 135 </envelope:orientation>
@@ -166,9 +167,9 @@
       </Factorial>
 
       <!-- WARNING: this is likely to take a LOOOOOONG time to pre-compute the stimulus images... -->
-			<!-- Factorial Name="o2rfMap" Levels="6,4,4,4,6">
-				<Factor1 Name="carrierOrientation">
-					<mygrating>
+      <!-- Factorial Name="o2rfMap" Levels="6,4,4,4,6">
+        <Factor1 Name="carrierOrientation">
+          <mygrating>
             <carrier:orientation> 0 | 30 | 60 | 90 | 120 | 150 </carrier:orientation>
           </mygrating>
         </Factor1>
@@ -197,14 +198,14 @@
           </mygrating>
         </Factor5>
       </Factorial -->
-		</Conditions>
-       
+    </Conditions>
+
     <Blocks>
-			<Block Randomize="WithoutReplacement" Retry="RandomInBlock" Repeats="10">
+      <Block Randomize="WithoutReplacement" Retry="RandomInBlock" Repeats="10">
         <o2rfMap/>
-			</Block>
-		</Blocks>
-	</Design>
+      </Block>
+    </Blocks>
+  </Design>
 
 </Experiment>
 

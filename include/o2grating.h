@@ -62,13 +62,11 @@ class o2grating:
 
 		void calcLumVals(); // calculates luminance values in lumVals
 
-		bool preCompute;
+		nsBool preCompute;
 
 		// fancy OpenGL stuff...?
 		GLdouble texProp;
 		GLuint textureName[1];
-		static const int NRTEXELS = 1024;
-//		GLfloat texture[NRTEXELS][NRTEXELS][3];
 		GLfloat *texture;
 
 		std::vector<GLfloat *> texPtrs; // pointers to pre-computed "textures"
