@@ -1,6 +1,6 @@
 // o2grating.cpp - static 2nd-order grating stimulus
 
-// 1/10/2014 - Shaun L. Cloherty <s.cloherty@ieee.org>
+// 2/10/2014 - Shaun L. Cloherty <s.cloherty@ieee.org>
 
 #include <stdio.h> // NULL
 
@@ -112,14 +112,14 @@ void o2grating::setup()
 		//       configuration prior to running real trials (indicated by trial = -1,
 		//       condition = -1 and block = -1)
 		
-		// allocate memory for the current texture
+		// allocate memory for the texture
 		texture = (GLfloat *)malloc(imageSize*imageSize*3*sizeof(GLfloat));
 
-		// calculate the texture
-		calcLumVals();
-		calcTexture();
-
 		if (preCompute) {
+			// calculate the texture
+			calcLumVals();
+			calcTexture();
+
 			// store texture pointer
 			if (texPtrs.size() < config) {
 				errLog << "Extending texPtrs to store " << config << " configurations." << endl;
