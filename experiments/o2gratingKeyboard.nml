@@ -85,7 +85,7 @@
       <Stimulus Name="mygrating" dll="o2grating">
         <Default>
           <stencilBit>     1  </stencilBit>
-          <outerDiam>      20.0  </outerDiam>
+          <outerDiam>      10.0  </outerDiam>
 
           <!-- innerDiam = 0 produces a circular aperture,
                innerDiam > 0 produces an annulus -->
@@ -123,8 +123,8 @@
           <meanLum>       -1  </meanLum>
 
           <CIE>
-            <XCIE>         -1  </XCIE>
-            <YCIE>         -1  </YCIE>
+            <XCIE>        -1  </XCIE>
+            <YCIE>        -1  </YCIE>
           </CIE>
 
           <!-- stimulus position -->
@@ -134,7 +134,7 @@
           <on>             0  </on>
           <off>            9999 </off>
 
-          <preCompute>     1  </preCompute>
+          <preCompute>     0  </preCompute>
         </Default>
       </Stimulus>
     </Stimuli>

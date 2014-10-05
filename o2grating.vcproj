@@ -26,6 +26,7 @@
 			>
 			<Tool
 				Name="VCPreBuildEventTool"
+				CommandLine="if exist &quot;C:\Program Files\Git\bin\sh.exe&quot; (&#x0D;&#x0A;if exist &quot;.git\&quot; (&#x0D;&#x0A;set HAVEGIT=1&#x0D;&#x0A;)&#x0D;&#x0A;)&#x0D;&#x0A;if defined HAVEGIT (&#x0D;&#x0A;&quot;$(VCInstallDir)\bin\vcvars32.bat&quot; &amp;&amp; nmake /f o2grating.nmake git&#x0D;&#x0A;) else (&#x0D;&#x0A;&quot;$(VCInstallDir)\bin\vcvars32.bat&quot; &amp;&amp; nmake /f o2grating.nmake nogit&#x0D;&#x0A;)&#x0D;&#x0A;"
 			/>
 			<Tool
 				Name="VCCustomBuildTool"
@@ -60,6 +61,7 @@
 			/>
 			<Tool
 				Name="VCPreLinkEventTool"
+				CommandLine=""
 			/>
 			<Tool
 				Name="VCLinkerTool"
@@ -106,6 +108,7 @@
 			>
 			<Tool
 				Name="VCPreBuildEventTool"
+				CommandLine="if exist &quot;C:\Program Files\Git\bin\sh.exe&quot; (&#x0D;&#x0A;if exist &quot;.git\&quot; (&#x0D;&#x0A;set HAVEGIT=1&#x0D;&#x0A;)&#x0D;&#x0A;)&#x0D;&#x0A;if defined HAVEGIT (&#x0D;&#x0A;&quot;$(VCInstallDir)\bin\vcvars32.bat&quot; &amp;&amp; nmake /f o2grating.nmake git&#x0D;&#x0A;) else (&#x0D;&#x0A;&quot;$(VCInstallDir)\bin\vcvars32.bat&quot; &amp;&amp; nmake /f o2grating.nmake nogit&#x0D;&#x0A;)&#x0D;&#x0A;"
 			/>
 			<Tool
 				Name="VCCustomBuildTool"
@@ -137,10 +140,11 @@
 			/>
 			<Tool
 				Name="VCPreLinkEventTool"
+				CommandLine=""
 			/>
 			<Tool
 				Name="VCLinkerTool"
-				AdditionalDependencies="neurostim.lib openAL32.lib Alut.lib"
+				AdditionalDependencies="neurostim.lib openAL32.lib Alut.lib o2grating_ver.obj"
 				OutputFile="$(SolutionDir)/dlls/o2grating.dll"
 				LinkIncremental="1"
 				AdditionalLibraryDirectories="$(NeurostimDir)/lib;"

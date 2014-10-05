@@ -1,10 +1,12 @@
 // o2grating.cpp - static 2nd-order grating stimulus
 
-// 2/10/2014 - Shaun L. Cloherty <s.cloherty@ieee.org>
+// 5/10/2014 - Shaun L. Cloherty <s.cloherty@ieee.org>
 
 #include <stdio.h> // NULL
 
 #include "o2grating.h"
+#include "o2grating_ver.h"
+
 #include "neurostim.h"
 
 #include "adams_little_helper.h"
@@ -17,7 +19,7 @@ o2grating::o2grating()
 {
 	name = "o2grating"; 
 
-//	rcsVersion = ""; // FIXME: add git tag info here...?
+	rcsVersion = name + "-" + GITVERSION;
 
 	// generate the OpenGL texture
 	glGenTextures(1,textureName);
